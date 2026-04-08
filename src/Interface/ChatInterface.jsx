@@ -24,7 +24,7 @@ function ChatInterface({ onLogout }) {
   }, []);
 
   const [userId] = useState(localStorage.getItem('user_id'));
-
+  const isGuest = sessionStorage.getItem('is_guest') === 'true';
   const handleSend = async (e) => {
     e.preventDefault();
     if (!inputValue.trim() && !attachedFile) return;
@@ -173,7 +173,7 @@ function ChatInterface({ onLogout }) {
       </aside>
 
       {/* Main Area */}
-      <main className="flex-1 flex flex-col relative min-w-0">
+      <main className="flex-1 flex flex-col  relative min-w-0">
         {/* Top bar */}
         <header className="flex items-center h-12 px-4 border-b border-dark-700/30 shrink-0">
           <button
@@ -186,6 +186,17 @@ function ChatInterface({ onLogout }) {
           </button>
           <span className="text-sm font-medium text-dark-100 ml-2 md:ml-0">Renee</span>
         </header>
+
+            {isGuest && (
+        <div className="sticky top-0 z-10 bg-amber-500/10 border-b border-amber-500/20 backdrop-blur-md">
+          <p className="text-amber-500 text-[11px] font-medium text-center py-2 flex items-center justify-center gap-2">
+            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            Guest Session: History won't be saved.
+          </p>
+        </div>
+      )}
 
         {/* Messages or Empty State */}
         <div className="flex-1 overflow-y-auto">

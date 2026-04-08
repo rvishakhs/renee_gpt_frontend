@@ -41,6 +41,17 @@ function Login({ onNavigate }) {
       }
     };
 
+  const handleGuestMode = () => {
+    // Generate a random ID for this session
+    const guestId = `guest_${Math.random().toString(36).substring(2, 11)}`;
+    
+    // Save to sessionStorage (disappears when tab closes)
+    sessionStorage.setItem('user_id', guestId);
+    sessionStorage.setItem('is_guest', 'true'); // Flag to identify guests if needed
+    
+    onNavigate('chat');
+  };
+
   return (
     <div className="flex-1 flex items-center justify-center p-4 bg-dark-950">
       <div className="w-full max-w-sm animate-fade-in-up">
@@ -93,6 +104,15 @@ function Login({ onNavigate }) {
             className="text-white hover:underline cursor-pointer font-medium transition-colors"
           >
             Create one
+          </span>
+        </p>
+        <p className="text-dark-200 text-center mt-2 text-sm">
+          Try for Now?{' '}
+          <span
+            onClick={handleGuestMode}
+            className="text-white hover:underline cursor-pointer font-medium transition-colors"
+          >
+            Guest Mode
           </span>
         </p>
       </div>
