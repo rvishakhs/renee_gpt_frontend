@@ -4,15 +4,42 @@ function Login({ onNavigate }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState(false);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    setIsLoading(true);
-    console.log("Logging in with:", email);
-    setTimeout(() => {
-      onNavigate('chat');
-    }, 400);
-  };
+  const handleSubmit = async (e) => {
+      e.preventDefault();
+      setIsLoading(true);
+      setError('');
+      setSuccess(false);
+
+      try {
+        const res = await fetch('http://localhost:8000/auth/login/user', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password }),
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+          setSuccess(true);
+          localStorage.setItem('user_id', data.user_id)
+          // Wait 2 seconds so they can read the success message
+          setTimeout(() => {
+            onNavigate('chat');
+          }, 2000);
+        } else {
+          // Show the specific error from FastAPI (e.g., "Email already registered")
+          setError(data.detail || 'Login failed. Please try again.');
+        }
+      } catch (err) {
+        setError('Could not connect to the server.');
+        console.error('Login error error:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
   return (
     <div className="flex-1 flex items-center justify-center p-4 bg-dark-950">

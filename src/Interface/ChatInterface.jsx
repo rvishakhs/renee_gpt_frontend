@@ -23,6 +23,8 @@ function ChatInterface({ onLogout }) {
     inputRef.current?.focus();
   }, []);
 
+  const [userId] = useState(localStorage.getItem('user_id'));
+
   const handleSend = async (e) => {
     e.preventDefault();
     if (!inputValue.trim() && !attachedFile) return;
@@ -51,7 +53,7 @@ function ChatInterface({ onLogout }) {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ 
-              session_id: '1', 
+              session_id: userId, 
               user_message: newUserMessage.text 
           }),
       });

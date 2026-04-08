@@ -4,26 +4,63 @@ function Register({ onNavigate }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(''); // New state for error messages
+  const [success, setSuccess] = useState(false); // New state for success feedback
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    console.log("Registering:", email);
-    setTimeout(() => {
-      onNavigate('chat');
-    }, 400);
+    setError('');
+    setSuccess(false);
+
+    try {
+      const res = await fetch('http://localhost:8000/auth/register/user', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        setSuccess(true);
+        // Wait 2 seconds so they can read the success message
+        setTimeout(() => {
+          onNavigate('login');
+        }, 2000);
+      } else {
+        // Show the specific error from FastAPI (e.g., "Email already registered")
+        setError(data.detail || 'Registration failed. Please try again.');
+      }
+    } catch (err) {
+      setError('Could not connect to the server.');
+      console.error('Registration error:', err);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
     <div className="flex-1 flex items-center justify-center p-4 bg-dark-950">
       <div className="w-full max-w-sm animate-fade-in-up">
-        {/* Logo / Brand */}
         <div className="text-center mb-10">
           <h1 className="text-3xl font-bold text-white tracking-tight">Renee</h1>
           <p className="text-dark-200 text-sm mt-2">Create your account</p>
         </div>
 
-        {/* Form */}
+        {/* --- Feedback Messages --- */}
+        {error && (
+          <div className="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/50 text-red-500 text-xs text-center">
+            {error}
+          </div>
+        )}
+
+        {success && (
+          <div className="mb-4 p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/50 text-emerald-500 text-xs text-center">
+            Success! Redirecting to login...
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} className="space-y-3">
           <input
             type="email"
@@ -43,22 +80,13 @@ function Register({ onNavigate }) {
           />
           <button
             type="submit"
-            disabled={isLoading}
+            disabled={isLoading || success}
             className="w-full bg-white text-black font-medium py-3.5 rounded-xl hover:bg-gray-200 active:scale-[0.98] transition-all duration-200 text-sm disabled:opacity-50"
           >
-            {isLoading ? (
-              <span className="flex items-center justify-center gap-2">
-                <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                </svg>
-                Creating account...
-              </span>
-            ) : 'Create Account'}
+            {isLoading ? 'Creating account...' : success ? 'Success!' : 'Create Account'}
           </button>
         </form>
 
-        {/* Footer link */}
         <p className="text-dark-200 text-center mt-8 text-sm">
           Already have an account?{' '}
           <span
