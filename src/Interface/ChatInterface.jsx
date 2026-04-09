@@ -7,6 +7,8 @@ function ChatInterface({ onLogout }) {
   const [attachedFile, setAttachedFile] = useState(null);
   const [isTyping, setIsTyping] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [selectedModel, setSelectedModel] = useState('gpt'); // Default model
+  const [showModelMenu, setShowModelMenu] = useState(false);
   const fileInputRef = useRef(null);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
@@ -14,6 +16,12 @@ function ChatInterface({ onLogout }) {
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
+
+  const models = [
+  { id: 'gpt', name: 'Chat GPT', desc: 'Fast & Reliable' },
+  { id: 'deepseek', name: 'Custom DeepSeek', desc: 'Specialized Reasoning' },
+  { id: 'llama', name: 'Custom Llama 2', desc: 'Balanced Performance' }
+];
 
   useEffect(() => {
     scrollToBottom();
@@ -328,6 +336,31 @@ function ChatInterface({ onLogout }) {
         {/* Input Area */}
         <div className={`shrink-0 px-4 md:px-0 pb-4 md:pb-6 ${isEmptyChat ? 'pt-0' : 'pt-2'}`}>
           <div className="max-w-2xl mx-auto w-full relative">
+              {showModelMenu && (
+              <div className="absolute bottom-full mb-3 left-0 w-64 bg-dark-800 border border-dark-500 rounded-2xl shadow-2xl p-2 z-50 animate-scale-in">
+                <div className="text-[10px] font-bold text-dark-400 px-3 py-1 uppercase tracking-wider">Select Model</div>
+                {models.map((m) => (
+                  <button
+                    key={m.id}
+                    onClick={() => {
+                      setSelectedModel(m.id);
+                      setShowModelMenu(false);
+                    }}
+                    className="w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl hover:bg-dark-700 transition-colors group"
+                  >
+                    <div className="text-left">
+                      <div className="text-sm font-medium text-white">{m.name}</div>
+                      <div className="text-[10px] text-dark-300">{m.desc}</div>
+                    </div>
+                    {selectedModel === m.id && (
+                      <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
+                      </svg>
+                    )}
+                  </button>
+                ))}
+              </div>
+            )}
             {/* File preview */}
             {attachedFile && (
               <div className="mb-2 animate-scale-in">
@@ -352,6 +385,17 @@ function ChatInterface({ onLogout }) {
               onSubmit={handleSend}
               className="flex items-end bg-dark-800 border border-dark-500 rounded-2xl overflow-hidden transition-all duration-200 focus-within:border-dark-400 focus-within:shadow-[0_0_0_1px_rgba(255,255,255,0.05)]"
             >
+              {/* Model Selector Button */}
+              <button
+                type="button"
+                onClick={() => setShowModelMenu(!showModelMenu)}
+                className={`p-3.5 mb-0.5  transition-colors shrink-0 ${showModelMenu ? 'text-white' : 'text-dark-300 hover:text-white'}`}
+                title="Change Model"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 20 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                </svg>
+              </button>
               <input
                 type="file"
                 ref={fileInputRef}
@@ -384,7 +428,7 @@ function ChatInterface({ onLogout }) {
               <button
                 type="submit"
                 disabled={!inputValue.trim() && !attachedFile}
-                className="p-2 m-1.5 bg-white text-black rounded-xl hover:bg-gray-200 active:scale-95 disabled:opacity-20 disabled:hover:bg-white transition-all duration-150 shrink-0"
+                className="p-2 mx-2 my-2.5   bg-white text-black rounded-xl hover:bg-gray-200 active:scale-95 disabled:opacity-20 disabled:hover:bg-white transition-all duration-150 shrink-0"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
