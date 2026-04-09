@@ -11,7 +11,7 @@ function App() {
       <div className="flex-1 flex flex-col animate-fade-in" key={currentView}>
         {currentView === 'login' && <Login onNavigate={setCurrentView} />}
         {currentView === 'register' && <Register onNavigate={setCurrentView} />}
-        {currentView === 'chat' && <ChatInterface onLogout={() => setCurrentView('login')} />}
+        {currentView === 'chat' && <ChatInterface onNavigate={setCurrentView} />}
       </div>
     </div>
   );

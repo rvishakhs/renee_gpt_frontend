@@ -1,11 +1,49 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 function Login({ onNavigate }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [accessToken, setAccessToken] = useState(null);
+  const [message, setMessage] = useState('Checking session...');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+
+    useEffect(() => {
+      const checkSession = async () => {
+        setIsLoading(true); // Start loading immediately
+        const storedToken = localStorage.getItem('accessToken');
+        
+        if (storedToken) {
+          try {
+            const response = await fetch('http://localhost:8000/auth/verify', {
+              headers: { 'Authorization': `Bearer ${storedToken}` }
+            });
+
+            if (response.ok) {
+              setAccessToken(storedToken);
+              onNavigate('chat'); // If valid, go straight to chat
+              return; 
+            } 
+            
+            // If verify fails (401), try to refresh
+            const newToken = await handleRefresh();
+            if (newToken) {
+              onNavigate('chat');
+              return;
+            }
+          } catch (err) {
+            console.error("Session check failed", err);
+          }
+        }
+        
+        // If no token or refresh failed, stop loading and stay on login
+        setIsLoading(false);
+        setMessage('Please sign in');
+      };
+
+      checkSession();
+    }, []);
 
   const handleSubmit = async (e) => {
       e.preventDefault();
@@ -24,7 +62,11 @@ function Login({ onNavigate }) {
 
         if (res.ok) {
           setSuccess(true);
+          const token = data.access_token;
+          setAccessToken(token);
+          localStorage.setItem('accessToken', token); 
           sessionStorage.setItem('user_id', data.user_id);
+
           // Wait 2 seconds so they can read the success message
           setTimeout(() => {
             onNavigate('chat');
@@ -40,6 +82,28 @@ function Login({ onNavigate }) {
         setIsLoading(false);
       }
     };
+
+  const handleRefresh = async () => {
+    const response = await fetch('http://localhost:8000/auth/refresh', {
+      method: 'POST',
+      credentials: 'include' // Crucial: sends the HttpOnly cookie
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      setAccessToken(data.access_token);
+      // NEW: Update localStorage with the brand new token
+      localStorage.setItem('accessToken', data.access_token);
+      setMessage('Session refreshed successfully!');
+      return data.access_token;
+    } else {
+      // NEW: If refresh fails, clear everything out
+      setAccessToken(null);
+      localStorage.removeItem('accessToken');
+      setMessage('Please log in.');
+      return null;
+    }
+  };
 
   const handleGuestMode = () => {
     // Generate a random ID for this session

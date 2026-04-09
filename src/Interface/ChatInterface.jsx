@@ -1,7 +1,7 @@
 import { data } from 'autoprefixer';
 import React, { useState, useRef, useEffect } from 'react';
 
-function ChatInterface({ onLogout }) {
+function ChatInterface({ onNavigate }) {
   const [messages, setMessages] = useState([]);
   const [inputValue, setInputValue] = useState('');
   const [attachedFile, setAttachedFile] = useState(null);
@@ -55,6 +55,7 @@ function ChatInterface({ onLogout }) {
 
   const userId = sessionStorage.getItem('user_id');
   const isGuest = sessionStorage.getItem('is_guest') === 'true';
+
 
   const handleSend = async (e) => {
     e.preventDefault();
@@ -170,6 +171,11 @@ function ChatInterface({ onLogout }) {
   } finally {
       setIsTyping(false);
   }
+  };
+
+  const onLogout = () => {
+      localStorage.removeItem('accessToken');
+      onNavigate('login')
   };
 
   const handleFileChange = (e) => {
