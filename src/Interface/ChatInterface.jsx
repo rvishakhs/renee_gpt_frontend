@@ -23,6 +23,31 @@ function ChatInterface({ onLogout }) {
     inputRef.current?.focus();
   }, []);
 
+  useEffect(() => {
+    const fetchHistory = async () => {
+      const userId = localStorage.getItem('user_id');
+      const isGuest = sessionStorage.getItem('is_guest') === 'true';
+
+      // Don't fetch if it's a guest or no ID exists
+      if (!userId || isGuest) return;
+
+      try {
+        const res = await fetch(`http://localhost:8000/chat/sessions/${userId}/history`);
+        if (res.ok) {
+          const history = await res.json();
+          // Update your messages state with the DB records
+          setMessages(history); 
+        }
+      } catch (err) {
+        console.error("Failed to load history:", err);
+      }
+    };
+
+    fetchHistory();
+  }, []);
+
+  console.log(messages)
+
   const [userId] = useState(localStorage.getItem('user_id'));
   const isGuest = sessionStorage.getItem('is_guest') === 'true';
   const handleSend = async (e) => {
