@@ -24,7 +24,7 @@ function Login({ onNavigate }) {
 
         if (res.ok) {
           setSuccess(true);
-          localStorage.setItem('user_id', data.user_id)
+          sessionStorage.setItem('user_id', data.user_id);
           // Wait 2 seconds so they can read the success message
           setTimeout(() => {
             onNavigate('chat');

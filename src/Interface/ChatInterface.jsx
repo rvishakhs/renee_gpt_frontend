@@ -25,8 +25,7 @@ function ChatInterface({ onLogout }) {
 
   useEffect(() => {
     const fetchHistory = async () => {
-      const userId = localStorage.getItem('user_id');
-      const isGuest = sessionStorage.getItem('is_guest') === 'true';
+      const userId = sessionStorage.getItem('user_id');
 
       // Don't fetch if it's a guest or no ID exists
       if (!userId || isGuest) return;
@@ -46,13 +45,42 @@ function ChatInterface({ onLogout }) {
     fetchHistory();
   }, []);
 
-  console.log(messages)
-
-  const [userId] = useState(localStorage.getItem('user_id'));
+  const userId = sessionStorage.getItem('user_id');
   const isGuest = sessionStorage.getItem('is_guest') === 'true';
+
   const handleSend = async (e) => {
     e.preventDefault();
     if (!inputValue.trim() && !attachedFile) return;
+
+    const fileToBase64 = (file) => new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = error => reject(error);
+    });
+
+    let processedFileData = null;
+    if (attachedFile) {
+      try {
+        // 1. Convert to Base64 first
+        const base64String = await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.readAsDataURL(attachedFile);
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = error => reject(error);
+        });
+
+        // 2. Build the object structure Python expects
+        processedFileData = {
+          name: attachedFile.name,
+          content: base64String, // The long string
+          type: attachedFile.type
+        };
+        console.log("File processed successfully:", attachedFile.name);
+      } catch (err) {
+        console.error("File processing failed:", err);
+      }
+    }
 
     const newUserMessage = {
       id: Date.now(),
@@ -63,6 +91,8 @@ function ChatInterface({ onLogout }) {
 
     setMessages((prev) => [...prev, newUserMessage]);
     setInputValue('');
+    setAttachedFile(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
     setIsTyping(true);
 
     // 1. Create a placeholder for the AI response
@@ -79,7 +109,8 @@ function ChatInterface({ onLogout }) {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ 
               session_id: userId, 
-              user_message: newUserMessage.text 
+              user_message: newUserMessage.text,
+              attachedFile : processedFileData
           }),
       });
 
