@@ -21,8 +21,10 @@ function Login({ onNavigate }) {
             });
 
             if (response.ok) {
+              const data = await response.json();
+              sessionStorage.setItem('user_id', data.user_id);
               setAccessToken(storedToken);
-              onNavigate('chat'); // If valid, go straight to chat
+              onNavigate('chat');
               return; 
             } 
             
@@ -31,6 +33,7 @@ function Login({ onNavigate }) {
             if (newToken) {
               onNavigate('chat');
               return;
+
             }
           } catch (err) {
             console.error("Session check failed", err);

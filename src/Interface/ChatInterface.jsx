@@ -18,9 +18,8 @@ function ChatInterface({ onNavigate }) {
   };
 
   const models = [
-  { id: 'gpt', name: 'Chat GPT', desc: 'Fast & Reliable' },
-  { id: 'deepseek', name: 'Custom DeepSeek', desc: 'Specialized Reasoning' },
-  { id: 'llama', name: 'Custom Llama 2', desc: 'Balanced Performance' }
+  { id: 'gpt', name: 'Chat GPT', desc: 'Fast & Basic inferencing' },
+  { id: 'deepseek', name: 'Renee GPT', desc: 'will take a minute to start (Having a snooze in AWS)' }
 ];
 
   useEffect(() => {
@@ -119,7 +118,8 @@ function ChatInterface({ onNavigate }) {
           body: JSON.stringify({ 
               session_id: userId, 
               user_message: newUserMessage.text,
-              attachedFile : processedFileData
+              attachedFile : processedFileData,
+              model: selectedModel
           }),
       });
 
