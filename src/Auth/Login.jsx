@@ -16,7 +16,9 @@ function Login({ onNavigate }) {
         
         if (storedToken) {
           try {
-            const response = await fetch('http://localhost:8000/auth/verify', {
+
+            const apiUrl = import.meta.env.VITE_API_URL
+            const response = await fetch('${apiUrl}/auth/verify', {
               headers: { 'Authorization': `Bearer ${storedToken}` }
             });
 

@@ -16,7 +16,7 @@ function ChatInterface({ onNavigate }) {
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
-
+  const apiUrl = import.meta.env.VITE_API_URL
   const models = [
   { id: 'gpt', name: 'Chat GPT', desc: 'Fast & Basic inferencing' },
   { id: 'deepseek', name: 'Renee GPT', desc: 'will take a minute to start (Having a snooze in AWS)' }
@@ -38,7 +38,7 @@ function ChatInterface({ onNavigate }) {
       if (!userId || isGuest) return;
 
       try {
-        const res = await fetch(`http://localhost:8000/chat/sessions/${userId}/history`);
+        const res = await fetch(`${apiUrl}/chat/sessions/${userId}/history`);
         if (res.ok) {
           const history = await res.json();
           // Update your messages state with the DB records
@@ -112,7 +112,7 @@ function ChatInterface({ onNavigate }) {
   };
   setMessages((prev) => [...prev, aiPlaceholder]);
   try {
-      const res = await fetch('http://localhost:8000/chat/sessions/stream', {
+      const res = await fetch('${apiUrl}/chat/sessions/stream', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ 

@@ -14,7 +14,8 @@ function Register({ onNavigate }) {
     setSuccess(false);
 
     try {
-      const res = await fetch('http://localhost:8000/auth/register/user', {
+      const apiUrl = import.meta.env.VITE_API_URL
+      const res = await fetch('${apiUrl}/auth/register/user', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
