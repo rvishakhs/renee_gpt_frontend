@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import Spline from '@splinetool/react-spline';
 
 function Login({ onNavigate }) {
   const [email, setEmail] = useState('');
@@ -18,7 +19,8 @@ function Login({ onNavigate }) {
           try {
 
             const apiUrl = import.meta.env.VITE_API_URL
-            const response = await fetch('${apiUrl}/auth/verify', {
+            console.log(apiUrl)
+            const response = await fetch(`${apiUrl}/auth/verify`, {
               headers: { 'Authorization': `Bearer ${storedToken}` }
             });
 
@@ -57,7 +59,7 @@ function Login({ onNavigate }) {
       setSuccess(false);
 
       try {
-        const res = await fetch('http://localhost:8000/auth/login/user', {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/auth/login/user`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email, password }),
@@ -89,7 +91,7 @@ function Login({ onNavigate }) {
     };
 
   const handleRefresh = async () => {
-    const response = await fetch('http://localhost:8000/auth/refresh', {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/refresh`, {
       method: 'POST',
       credentials: 'include' // Crucial: sends the HttpOnly cookie
     });
@@ -122,68 +124,79 @@ function Login({ onNavigate }) {
   };
 
   return (
-    <div className="flex-1 flex items-center justify-center p-4 bg-dark-950">
-      <div className="w-full max-w-sm animate-fade-in-up">
-        {/* Logo / Brand */}
-        <div className="text-center mb-10">
-          <h1 className="text-3xl font-bold text-white tracking-tight">Renee</h1>
-          <p className="text-dark-200 text-sm mt-2">Your AI assistant</p>
+    <div className="flex-1 flex flex-col md:flex-row bg-dark-950">
+      {/* Left: Spline Animation - hidden on mobile, 60% on desktop/tablet */}
+      <div className="hidden md:block md:w-[65%] relative">
+        <Spline
+          className="w-full h-full"
+          scene="https://prod.spline.design/vD6ZXvjjaqsQuTlC/scene.splinecode"
+        />
+      </div>
+
+      {/* Right: Login Form - full width on mobile, 40% on desktop/tablet */}
+      <div className="flex-1 md:w-[35%] flex items-center justify-center p-4">
+        <div className="w-full max-w-sm animate-fade-in-up">
+          {/* Logo / Brand */}
+          <div className="text-center mb-10">
+            <h1 className="text-3xl font-bold text-white tracking-tight">Renee</h1>
+            <p className="text-dark-200 text-sm mt-2">Your AI assistant</p>
+          </div>
+
+          {/* Form */}
+          <form onSubmit={handleSubmit} className="space-y-3">
+            <input
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              className="w-full px-4 py-3.5 rounded-xl bg-dark-700 border border-dark-500 text-white placeholder-dark-200 focus:outline-none focus:border-dark-300 focus:ring-1 focus:ring-dark-300 transition-all duration-200 text-sm"
+            />
+            <input
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              className="w-full px-4 py-3.5 rounded-xl bg-dark-700 border border-dark-500 text-white placeholder-dark-200 focus:outline-none focus:border-dark-300 focus:ring-1 focus:ring-dark-300 transition-all duration-200 text-sm"
+            />
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="w-full bg-white text-black font-medium py-3.5 rounded-xl hover:bg-gray-200 active:scale-[0.98] transition-all duration-200 text-sm disabled:opacity-50"
+            >
+              {isLoading ? (
+                <span className="flex items-center justify-center gap-2">
+                  <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                  Signing in...
+                </span>
+              ) : 'Sign In'}
+            </button>
+          </form>
+
+          {/* Footer link */}
+          <p className="text-dark-200 text-center mt-8 text-sm">
+            Don't have an account?{' '}
+            <span
+              onClick={() => onNavigate('register')}
+              className="text-white hover:underline cursor-pointer font-medium transition-colors"
+            >
+              Create one
+            </span>
+          </p>
+          <p className="text-dark-200 text-center mt-2 text-sm">
+            Try for Now?{' '}
+            <span
+              onClick={handleGuestMode}
+              className="text-white hover:underline cursor-pointer font-medium transition-colors"
+            >
+              Guest Mode
+            </span>
+          </p>
         </div>
-
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-3">
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            className="w-full px-4 py-3.5 rounded-xl bg-dark-700 border border-dark-500 text-white placeholder-dark-200 focus:outline-none focus:border-dark-300 focus:ring-1 focus:ring-dark-300 transition-all duration-200 text-sm"
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            className="w-full px-4 py-3.5 rounded-xl bg-dark-700 border border-dark-500 text-white placeholder-dark-200 focus:outline-none focus:border-dark-300 focus:ring-1 focus:ring-dark-300 transition-all duration-200 text-sm"
-          />
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="w-full bg-white text-black font-medium py-3.5 rounded-xl hover:bg-gray-200 active:scale-[0.98] transition-all duration-200 text-sm disabled:opacity-50"
-          >
-            {isLoading ? (
-              <span className="flex items-center justify-center gap-2">
-                <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                </svg>
-                Signing in...
-              </span>
-            ) : 'Sign In'}
-          </button>
-        </form>
-
-        {/* Footer link */}
-        <p className="text-dark-200 text-center mt-8 text-sm">
-          Don't have an account?{' '}
-          <span
-            onClick={() => onNavigate('register')}
-            className="text-white hover:underline cursor-pointer font-medium transition-colors"
-          >
-            Create one
-          </span>
-        </p>
-        <p className="text-dark-200 text-center mt-2 text-sm">
-          Try for Now?{' '}
-          <span
-            onClick={handleGuestMode}
-            className="text-white hover:underline cursor-pointer font-medium transition-colors"
-          >
-            Guest Mode
-          </span>
-        </p>
       </div>
     </div>
   );
